@@ -1,5 +1,6 @@
-import { Min, Validate, IsPositive } from 'class-validator';
+import { IsOptional, IsPositive, Min, Validate } from 'class-validator';
 import { Field, InputType, Int } from '@nestjs/graphql';
+import { Expose } from 'class-transformer';
 import { Paging } from '@nestjs-query/core';
 import { ConnectionCursorType, ConnectionCursorScalar } from '../../cursor.scalar';
 import { CannotUseWith, CannotUseWithout, IsUndefined } from '../../validators';
@@ -28,6 +29,13 @@ export const CursorPagingType = (): StaticCursorPagingType => {
   @InputType('CursorPaging')
   class GraphQLCursorPagingImpl implements CursorPagingType {
     static strategy: PagingStrategies.CURSOR = PagingStrategies.CURSOR;
+
+    @Field(() => Int, { name: 'offset', nullable: true, description: 'Paginate offset' })
+    @Expose({ name: 'offset' })
+    @IsOptional()
+    @Validate(CannotUseWith, ['after', 'before'])
+    @Min(0)
+    inOffset?: number;
 
     @Field(() => ConnectionCursorScalar, {
       nullable: true,
